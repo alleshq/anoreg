@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const fs = require("fs");
 
 // Express
 const express = require("express");
@@ -32,7 +33,12 @@ app.get("/account/quickauth/callback", (req, res) => {
 const auth = async (req, res, next) => {
     if (typeof req.cookies.token !== "string") return res.status(401).json({err: "badAuthorization"});
     try {
-        req.user = (await jwt.verify(req.cookies.token, process.env.JWT_SECRET)).id;
+        const id = (await jwt.verify(req.cookies.token, process.env.JWT_SECRET)).id;
+        req.user = {
+            id,
+            secret: "pppaaaaaaassssssssssswwwooooooooorrrrrrd",
+            groups: "alles other-group"
+        };
     } catch (err) {
         return res.status(401).json({err: "badAuthorization"});
     }
@@ -40,8 +46,17 @@ const auth = async (req, res, next) => {
 };
 
 // Account Page
+const page = fs.readFileSync(`${__dirname}/index.html`, "utf8").split("*");
 app.get("/account", auth, (req, res) => {
-    res.send(`Hello, user ${req.user}`);
+    res.send(
+        page[0] +
+        req.user.id +
+        page[1] +
+        req.user.secret +
+        page[2] +
+        req.user.groups +
+        page[3]
+    );
 });
 
 // 404
