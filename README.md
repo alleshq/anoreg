@@ -1,0 +1,2 @@
+# Alles Node Registry
+This is the backend for Alles Node Registry, which handles accounts. The service uses [Verdaccio](https://verdaccio.org) with our [verdaccio-api-auth](https://gh.alles.cx/verdaccio-api-auth) plugin.
