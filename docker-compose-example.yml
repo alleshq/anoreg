@@ -8,3 +8,4 @@ services:
       - 127.0.0.1:8080:8080
     environment:
       - QUICKAUTH_URL=https://anr.alles.cc/account/quickauth/callback
+      - JWT_SECRET=
