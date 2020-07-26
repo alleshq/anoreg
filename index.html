@@ -10,7 +10,17 @@
     <body>
         <h1>Alles Node Registry</h1>
         <p>User ID: *</p>
-        <p>User Secret: *</p>
+        <p>User Secret: <span id="secretDisplay">*</span></p>
+        <button id="regenerateSecret">Regenerate Secret</button>
         <p>Groups: *</p>
+
+        <script>
+            regenerateSecret.onclick = () =>
+                fetch("/account", {method: "POST"}).then(
+                    res => res.json().then(
+                        ({secret}) => secretDisplay.innerText = secret
+                    )
+                );
+        </script>
     </body>
 </html>

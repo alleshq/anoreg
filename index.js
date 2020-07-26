@@ -68,6 +68,15 @@ app.get("/account", auth, (req, res) => {
     );
 });
 
+// Regenerate Secret
+app.post("/account", auth, async (req, res) => {
+    if (!req.user) return res.status(401).json({err: "badAuthorization"});
+    await req.user.update({
+        secret: randomString(128)
+    });
+    res.json({secret: req.user.secret});
+});
+
 // Get Verdaccio Token
 const getToken = async (username, password) => (
     await axios.post(process.env.VERDACCIO_LOGIN, {username, password}) 
