@@ -7,6 +7,8 @@ const randomString = require("randomstring").generate;
 const express = require("express");
 const app = express();
 app.use(require("cookie-parser")());
+app.use(require("body-parser").json());
+app.use((err, req, res, next) => res.status(500).json({err: "internalError"}));
 app.listen(8080);
 
 // QuickAuth
@@ -63,6 +65,24 @@ app.get("/account", auth, (req, res) => {
         req.user.groups +
         page[3]
     );
+});
+
+// API: Authenticate
+app.post("/account/api/authenticate", async (req, res) => {
+    if (
+        typeof req.body.username !== "string" ||
+        typeof req.body.password !== "string"
+    ) return res.status(400).json({err: "badRequest"});
+
+    const user = await User.findOne({
+        where: {
+            id: req.body.username
+        }
+    });
+    if (!user || user.secret !== req.body.password)
+        return res.status(400).json({err: "user.signIn.credentials"});
+    
+    res.json(user.groups.split(" "));
 });
 
 // 404
