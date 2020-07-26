@@ -12,6 +12,8 @@
         <p>User ID: *</p>
         <p>User Secret: <span id="secretDisplay">*</span></p>
         <button id="regenerateSecret">Regenerate Secret</button>
+        <button id="signOut">Sign Out</button>
+
         <p>Groups: *</p>
 
         <script>
@@ -21,6 +23,8 @@
                         ({secret}) => secretDisplay.innerText = secret
                     )
                 );
+            
+            signOut.onclick = () => location.href = "/account/signout";
         </script>
     </body>
 </html>

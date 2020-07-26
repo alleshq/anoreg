@@ -77,6 +77,12 @@ app.post("/account", auth, async (req, res) => {
     res.json({secret: req.user.secret});
 });
 
+// Sign out
+app.get("/account/signout", (req, res) => {
+    res.clearCookie("token");
+    res.send("<script>localStorage.removeItem('token'); localStorage.removeItem('username');</script><p>You're signed out!</p>")
+});
+
 // Get Verdaccio Token
 const getToken = async (username, password) => (
     await axios.post(process.env.VERDACCIO_LOGIN, {username, password}) 
