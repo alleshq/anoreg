@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 const fs = require("fs");
 const User = require("./db");
 const randomString = require("randomstring").generate;
+const axios = require("axios");
 
 // Express
 const express = require("express");
@@ -28,7 +29,7 @@ app.get("/account/quickauth", (req, res) => {
                     httpOnly: true
                 }
             );
-            res.redirect("/account");
+            res.redirect("/account/auth");
         })
         .catch(() => res.status(401).json({err: "badAuthorization"}));
 });
@@ -65,6 +66,19 @@ app.get("/account", auth, (req, res) => {
         req.user.groups +
         page[3]
     );
+});
+
+// Get Verdaccio Token
+const getToken = async (username, password) => (
+    await axios.post(process.env.VERDACCIO_LOGIN, {username, password}) 
+).data.token;
+
+// Sign in to Verdaccio
+app.get("/account/auth", auth, (req, res) => {
+    if (!req.user) return res.redirect(quickauthUrl);
+    getToken(req.user.id, req.user.secret)
+        .then(token => res.send(`<p>Signing you in...</p><script>localStorage.setItem("token", "${token}"); localStorage.setItem("username", "${req.user.id}"); location.href = localStorage.getItem("redirect") ? localStorage.getItem("redirect") : "/";</script>`))
+        .catch(() => res.status(500).json({err: "internalError"}));
 });
 
 // API: Authenticate
