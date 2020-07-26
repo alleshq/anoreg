@@ -11,9 +11,8 @@ app.listen(8080);
 
 // QuickAuth
 const quickauth = require("@alleshq/quickauth");
-const db = require("./db");
-app.get("/account/quickauth", (_req, res) => res.redirect(quickauth.url(process.env.QUICKAUTH_URL)));
-app.get("/account/quickauth/callback", (req, res) => {
+const quickauthUrl = quickauth.url(process.env.QUICKAUTH_URL);
+app.get("/account/quickauth", (req, res) => {
     if (typeof req.query.token !== "string")
         return res.status(400).json({err: "badRequest"});
 
@@ -33,8 +32,8 @@ app.get("/account/quickauth/callback", (req, res) => {
 });
 
 // Auth Middleware
-const auth = async (req, res, next) => {
-    if (typeof req.cookies.token !== "string") return res.status(401).json({err: "badAuthorization"});
+const auth = async (req, _res, next) => {
+    if (typeof req.cookies.token !== "string") return next();
     try {
         const id = (await jwt.verify(req.cookies.token, process.env.JWT_SECRET)).id;
         req.user = await User.findOne({
@@ -47,15 +46,14 @@ const auth = async (req, res, next) => {
             secret: randomString(128),
             groups: "users"
         });
-    } catch (err) {
-        return res.status(401).json({err: "badAuthorization"});
-    }
+    } catch (err) {}
     next();
 };
 
 // Account Page
 const page = fs.readFileSync(`${__dirname}/index.html`, "utf8").split("*");
 app.get("/account", auth, (req, res) => {
+    if (!req.user) return res.redirect(quickauthUrl);
     res.send(
         page[0] +
         req.user.id +
