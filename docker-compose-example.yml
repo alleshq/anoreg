@@ -9,3 +9,7 @@ services:
     environment:
       - QUICKAUTH_URL=https://anr.alles.cc/account/quickauth/callback
       - JWT_SECRET=
+      - DB_HOST=
+      - DB_NAME=
+      - DB_USERNAME=
+      - DB_PASSWORD=

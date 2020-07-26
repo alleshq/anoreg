@@ -1,5 +1,7 @@
 const jwt = require("jsonwebtoken");
 const fs = require("fs");
+const User = require("./db");
+const randomString = require("randomstring").generate;
 
 // Express
 const express = require("express");
@@ -9,6 +11,7 @@ app.listen(8080);
 
 // QuickAuth
 const quickauth = require("@alleshq/quickauth");
+const db = require("./db");
 app.get("/account/quickauth", (_req, res) => res.redirect(quickauth.url(process.env.QUICKAUTH_URL)));
 app.get("/account/quickauth/callback", (req, res) => {
     if (typeof req.query.token !== "string")
@@ -34,11 +37,16 @@ const auth = async (req, res, next) => {
     if (typeof req.cookies.token !== "string") return res.status(401).json({err: "badAuthorization"});
     try {
         const id = (await jwt.verify(req.cookies.token, process.env.JWT_SECRET)).id;
-        req.user = {
+        req.user = await User.findOne({
+            where: {
+                id
+            }
+        });
+        if (!req.user) req.user = await User.create({
             id,
-            secret: "pppaaaaaaassssssssssswwwooooooooorrrrrrd",
-            groups: "alles other-group"
-        };
+            secret: randomString(128),
+            groups: "users"
+        });
     } catch (err) {
         return res.status(401).json({err: "badAuthorization"});
     }
