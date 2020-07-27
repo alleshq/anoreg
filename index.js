@@ -115,5 +115,8 @@ app.post("/account/api/authenticate", async (req, res) => {
     res.json(user.groups.split(" ").filter(group => !!group).concat("all"));
 });
 
+// API: Allow Access
+app.post("/account/api/allow_access", (_req, res) => res.json(true));
+
 // 404
 app.use((_req, res) => res.status(404).json({err: "notFound"}));
