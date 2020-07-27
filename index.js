@@ -47,7 +47,7 @@ const auth = async (req, _res, next) => {
         if (!req.user) req.user = await User.create({
             id,
             secret: randomString(128),
-            groups: "users"
+            groups: ""
         });
     } catch (err) {}
     next();
@@ -57,13 +57,14 @@ const auth = async (req, _res, next) => {
 const page = fs.readFileSync(`${__dirname}/index.html`, "utf8").split("*");
 app.get("/account", auth, (req, res) => {
     if (!req.user) return res.redirect(quickauthUrl);
+    const groups = req.user.groups.split(" ").filter(group => !!group);
     res.send(
         page[0] +
         req.user.id +
         page[1] +
         req.user.secret +
         page[2] +
-        req.user.groups +
+        (groups.length > 0 ? groups.join(", ") : "<i>None</i>") +
         page[3]
     );
 });
@@ -111,7 +112,7 @@ app.post("/account/api/authenticate", async (req, res) => {
     if (!user || user.secret !== req.body.password)
         return res.status(400).json({err: "user.signIn.credentials"});
     
-    res.json(user.groups.split(" "));
+    res.json(user.groups.split(" ").filter(group => !!group).concat("all"));
 });
 
 // 404
