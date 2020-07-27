@@ -150,5 +150,8 @@ app.post("/account/api/allow_publish", async (req, res) => {
     }
 });
 
+// API: Allow Unpublish
+app.post("/account/api/allow_unpublish", (_req, res) => res.json(false));
+
 // 404
 app.use((_req, res) => res.status(404).json({err: "notFound"}));
