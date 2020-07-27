@@ -99,8 +99,14 @@ app.get("/account/auth", auth, (req, res) => {
         .catch(() => res.status(500).json({err: "internalError"}));
 });
 
+// API Auth Middleware
+const apiAuth = (req, _res, next) => {
+    if (req.headers.authorization === process.env.API_SECRET) next();
+    else res.status(401).json({err: "badAuthorization"});
+};
+
 // API: Authenticate
-app.post("/account/api/authenticate", async (req, res) => {
+app.post("/account/api/authenticate", apiAuth, async (req, res) => {
     if (
         typeof req.body.username !== "string" ||
         typeof req.body.password !== "string"
@@ -118,10 +124,10 @@ app.post("/account/api/authenticate", async (req, res) => {
 });
 
 // API: Allow Access
-app.post("/account/api/allow_access", (_req, res) => res.json(true));
+app.post("/account/api/allow_access", apiAuth, (_req, res) => res.json(true));
 
 // API: Allow Publish
-app.post("/account/api/allow_publish", async (req, res) => {
+app.post("/account/api/allow_publish", apiAuth, async (req, res) => {
     try {
         if (
             typeof req.body.user.name !== "string" ||
@@ -151,7 +157,7 @@ app.post("/account/api/allow_publish", async (req, res) => {
 });
 
 // API: Allow Unpublish
-app.post("/account/api/allow_unpublish", (_req, res) => res.json(false));
+app.post("/account/api/allow_unpublish", apiAuth, (_req, res) => res.json(false));
 
 // 404
 app.use((_req, res) => res.status(404).json({err: "notFound"}));
