@@ -95,7 +95,16 @@ const getToken = async (username, password) => (
 app.get("/account/auth", auth, (req, res) => {
     if (!req.user) return res.redirect(quickauthUrl);
     getToken(req.user.id, req.user.secret)
-        .then(token => res.send(`<p>Signing you in...</p><script>const redirect = localStorage.getItem("redirect"); localStorage.removeItem("redirect"); localStorage.setItem("token", "${token}"); localStorage.setItem("username", "${req.user.id}"); setTimeout(() => location.href = redirect ? redirect : "/", 1000);</script>`))
+        .then(token => res.send(
+            `<p>Signing you in...</p>` +
+            `<script>` +
+            `const redirect = localStorage.getItem("redirect");` +
+            `localStorage.removeItem("redirect");` +
+            `localStorage.setItem("token", "${token}");` +
+            `localStorage.setItem("username", "${req.user.id}");` +
+            `setTimeout(() => location.href = redirect ? redirect : "/", 1000);` +
+            `</script>`
+        ))
         .catch(() => res.status(500).json({err: "internalError"}));
 });
 
