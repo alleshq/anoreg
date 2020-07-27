@@ -14,6 +14,8 @@ app.listen(8080);
 
 // QuickAuth
 const quickauth = require("@alleshq/quickauth");
+const { group } = require("console");
+const db = require("./db");
 const quickauthUrl = quickauth.url(process.env.QUICKAUTH_URL);
 app.get("/account/quickauth", (req, res) => {
     if (typeof req.query.token !== "string")
@@ -117,6 +119,36 @@ app.post("/account/api/authenticate", async (req, res) => {
 
 // API: Allow Access
 app.post("/account/api/allow_access", (_req, res) => res.json(true));
+
+// API: Allow Publish
+app.post("/account/api/allow_publish", async (req, res) => {
+    try {
+        if (
+            typeof req.body.user.name !== "string" ||
+            typeof req.body.package.name !== "string" ||
+            req.body.package.name.split("/").length !== 2 ||
+            !req.body.package.name.startsWith("@")
+        ) return res.json(false);
+
+        // Get user
+        const user = await User.findOne({
+            where: {
+                id: req.body.user.name
+            }
+        });
+        if (!user) return res.json(false);
+
+        // Determine if user is in group
+        const groups = user.groups.split(" ").filter(group => !!group);
+        const groupName = req.body.package.name.split("/")[0].substr(1);
+        if (groupName === "all" || !groups.includes(groupName)) return res.json(false);
+        
+        // Response
+        res.json(true);
+    } catch (err) {
+        res.status(400).json({err: "badRequest"});
+    }
+});
 
 // 404
 app.use((_req, res) => res.status(404).json({err: "notFound"}));
