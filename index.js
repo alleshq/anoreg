@@ -14,8 +14,6 @@ app.listen(8080);
 
 // QuickAuth
 const quickauth = require("@alleshq/quickauth");
-const { group } = require("console");
-const db = require("./db");
 const quickauthUrl = quickauth.url(process.env.QUICKAUTH_URL);
 app.get("/account/quickauth", (req, res) => {
     if (typeof req.query.token !== "string")
